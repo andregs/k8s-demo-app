@@ -12,3 +12,18 @@ https://hackmd.io/@ryanjbaxter/spring-on-k8s-workshop
    .\gradlew bootBuildImage
    docker push andregs/sandbox:k8s-demo-app
    ```
+6. Deploy to kubernetes:
+7. ```shell
+   mkdir k8s
+   kubectl.exe create deployment k8s-demo-app --dry-run=client -o yaml --image=andregs/sandbox:k8s-demo-app > k8s/deployment.yaml
+   kubectl.exe create service clusterip k8s-demo-app --tcp=80:8080 -o yaml --dry-run=client > k8s/service.yaml
+   minikube start
+   kubectl.exe apply -f ./k8s
+   kubectl.exe rollout status deployment k8s-demo-app
+   ```
+8. At this point the app is running, but it's accessible inside the cluster network only.
+9. Forward a port to the service and test it on your browser:
+10. ```shell
+    kubectl.exe port-forward service/k8s-demo-app 8080:80
+    ```
+11. 
