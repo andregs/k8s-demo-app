@@ -26,4 +26,26 @@ https://hackmd.io/@ryanjbaxter/spring-on-k8s-workshop
 10. ```shell
     kubectl.exe port-forward service/k8s-demo-app 8080:80
     ```
-11. 
+11. As an alternative to port-forwarding, change service type to LoadBalancer to expose it:
+12. ```
+    kubectl.exe expose deployment k8s-demo-app  --name=k8s-demo-app --type=LoadBalancer --port=80 --target-port=8080 --dry-run=client -o yaml > .\k8s\service.yaml
+    ```
+13. Cloud providers assign an external IP to services, but in local dev cluster we rely on minikube.
+14. Update application.yaml & deployment.yaml to add graceful shutdown & health probes.
+15. build, push, re-deploy and test the changes:
+16. ```
+    .\gradlew bootBuildImage
+    docker push andregs/sandbox:k8s-demo-app
+    kubectl.exe apply -f ./k8s
+    minikube.exe service --url k8s-demo-app
+    ```
+17. You can test the graceful shutdown by following the logs while deleting the running pod:
+18. ```
+    kubectl.exe logs k8s-demo-app-6b48b7f457-26v7n -f
+    kubectl.exe delete pod k8s-demo-app-6b48b7f457-26v7n
+    ```
+
+### skaffold & kustomize
+
+1. Clean-up our stuff: `kubectl delete -f ./k8s`
+2. 
