@@ -1,4 +1,5 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 plugins {
 	id("org.springframework.boot") version "2.6.3"
@@ -24,8 +25,8 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 
-tasks.bootBuildImage {
-	imageName = "andregs/sandbox:${rootProject.name}"
+tasks.getByName<BootBuildImage>("bootBuildImage") {
+	imageName = "andregs/${rootProject.name}"
 }
 
 tasks.withType<KotlinCompile> {

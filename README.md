@@ -10,12 +10,12 @@ https://hackmd.io/@ryanjbaxter/spring-on-k8s-workshop
 4. Build the app and publish it to Docker Hub:
 5. ```shell
    .\gradlew bootBuildImage
-   docker push andregs/sandbox:k8s-demo-app
+   docker push andregs/k8s-demo-app
    ```
 6. Deploy to kubernetes:
 7. ```shell
    mkdir k8s
-   kubectl.exe create deployment k8s-demo-app --dry-run=client -o yaml --image=andregs/sandbox:k8s-demo-app > k8s/deployment.yaml
+   kubectl.exe create deployment k8s-demo-app --dry-run=client -o yaml --image=andregs/k8s-demo-app > k8s/deployment.yaml
    kubectl.exe create service clusterip k8s-demo-app --tcp=80:8080 -o yaml --dry-run=client > k8s/service.yaml
    minikube start
    kubectl.exe apply -f ./k8s
@@ -35,7 +35,7 @@ https://hackmd.io/@ryanjbaxter/spring-on-k8s-workshop
 15. build, push, re-deploy and test the changes:
 16. ```
     .\gradlew bootBuildImage
-    docker push andregs/sandbox:k8s-demo-app
+    docker push andregs/k8s-demo-app
     kubectl.exe apply -f ./k8s
     minikube.exe service --url k8s-demo-app
     ```
@@ -48,4 +48,31 @@ https://hackmd.io/@ryanjbaxter/spring-on-k8s-workshop
 ### skaffold & kustomize
 
 1. Clean-up our stuff: `kubectl delete -f ./k8s`
-2. 
+2. Skaffold generates immutable tags for container images, so I cannot re-use andregs/sandbox repo.
+3. Skaffold stores built image in minikube local registry, so no push/download (docker hub) is required.
+4. After creating skaffold.yaml, execute `skaffold.exe dev --port-forward`
+   1. I get an error at this point. I tried a bleeding edge version to avoid https://github.com/GoogleContainerTools/skaffold/issues/6948 but the error persist:
+   2. See skaffold.yaml for more details.
+
+```
+[exporter] no default process type
+[exporter] Saving andregs/k8s-demo-app:latest...
+[exporter] *** Images (32e7b2810aeb):
+[exporter]       andregs/k8s-demo-app:latest
+[exporter] Reusing cache layer 'paketo-buildpacks/bellsoft-liberica:jdk'
+[exporter] Reusing cache layer 'paketo-buildpacks/syft:syft'
+[exporter] Adding cache layer 'paketo-buildpacks/gradle:application'
+[exporter] Adding cache layer 'paketo-buildpacks/gradle:cache'
+[exporter] Reusing cache layer 'cache.sbom'
+Build [andregs/k8s-demo-app] succeeded
+Tags used in deployment:
+- andregs/k8s-demo-app -> andregs/k8s-demo-app:32e7b2810aeb1b42d21fe5eb54cd03a291b8f7b0496ac9cf4420f9692b80a113
+  Starting deploy...
+- deployment.apps/k8s-demo-app created
+- service/k8s-demo-app created
+  Waiting for deployments to stabilize...
+- deployment/k8s-demo-app: container k8s-demo-app terminated with exit code 82
+    - pod/k8s-demo-app-8674d764cc-p9nsw: container k8s-demo-app terminated with exit code 82
+      > [k8s-demo-app-8674d764cc-p9nsw k8s-demo-app] ERROR: failed to launch: determine start command: when there is no default process a command is required
+- deployment/k8s-demo-app failed. Error: container k8s-demo-app terminated with exit code 82.
+```
